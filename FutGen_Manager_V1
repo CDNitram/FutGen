@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FutGen · Estrela Mecânica FC</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  /* Laranja vibrante — principal */
+  --or:#E8621A; --or-d:#B8460E; --or-l:#FDEEDE; --or-xl:#FEF6F0;
+  /* Verde grama */
+  --green:#1A7A3C; --green-d:#0F5228; --green-l:#E6F5EC; --green-m:#2A9E52;
+  /* Azul céu */
+  --blue:#1A6FA8; --blue-d:#0F4E7A; --blue-l:#E6F2FB; --blue-m:#2491D4;
+  /* Dourado */
+  --gold:#C9933A; --gold-l:#FFF8ED;
+  /* Neutros escuros (campo à noite) */
+  --dark:#0D2818; --mid:#2E6644; --light:#6A9E7A;
+  --bg:#F2F9F5; --card:#FFFFFF;
+  --grey:#E8F3EC; --grey2:#C8E0D0;
+  /* Status */
+  --red:#C0392B; --red-l:#FDECEA;
+  --silver:#8A8A8A; --bronze:#8B5E3C;
+  --r:16px;
+}
+html,body{min-height:100vh;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--dark);overscroll-behavior:none;}
+
+/* ── Splash ── */
+#splash{position:fixed;inset:0;background:linear-gradient(160deg,#0D2818 0%,#1A7A3C 60%,#0F4E7A 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .5s;}
+#splash.hide{opacity:0;pointer-events:none;}
+.splash-star{width:80px;height:80px;margin-bottom:20px;animation:spin-slow 6s linear infinite;}
+.splash-club{font-family:'Barlow Condensed';font-size:13px;font-weight:600;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
+.splash-title{font-family:'Barlow Condensed';font-size:48px;font-weight:800;color:#fff;letter-spacing:2px;line-height:1;}
+.splash-bar{width:160px;height:3px;background:rgba(255,255,255,.2);border-radius:99px;margin-top:28px;overflow:hidden;}
+.splash-bar-fill{height:100%;background:var(--or);border-radius:99px;animation:load-bar 1.8s ease-out forwards;}
+@keyframes spin-slow{to{transform:rotate(360deg);}}
+@keyframes load-bar{from{width:0}to{width:100%}}
+
+/* ── Layout ── */
+#app{display:flex;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;}
+
+/* ── Header ── */
+.app-header{background:linear-gradient(135deg,#0D2818 0%,#1A5C30 100%);padding:16px 20px 12px;position:sticky;top:0;z-index:100;}
+.header-top{display:flex;align-items:center;justify-content:space-between;}
+.header-club{font-family:'Barlow Condensed';font-size:11px;font-weight:600;letter-spacing:3px;color:var(--gold);text-transform:uppercase;}
+.header-title{font-family:'Barlow Condensed';font-size:26px;font-weight:800;color:#fff;letter-spacing:1px;line-height:1;}
+.header-badge{background:var(--or);color:#fff;font-family:'DM Mono';font-size:9px;font-weight:500;padding:3px 8px;border-radius:99px;letter-spacing:.5px;}
+.header-season{font-family:'DM Mono';font-size:9px;color:var(--light);letter-spacing:1px;margin-top:4px;}
+
+/* ── Nav tabs ── */
+.nav{display:grid;grid-template-columns:repeat(4,1fr);background:#0D2818;border-top:1px solid #1A5C30;padding:0 4px 8px;}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;border:none;cursor:pointer;color:var(--light);transition:color .15s;}
+.nav-btn.active{color:var(--or);}
+.nav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.nav-btn span{font-family:'DM Mono';font-size:9px;letter-spacing:.5px;text-transform:uppercase;}
+.nav-indicator{height:2px;background:var(--or);border-radius:99px;margin:0 8px;transition:opacity .15s;}
+.nav-btn:not(.active) .nav-indicator{opacity:0;}
+
+/* ── Screens ── */
+.screen{display:none;flex:1;overflow-y:auto;padding:0 0 80px;}
+.screen.active{display:block;}
+
+/* ── Section label ── */
+.section-label{font-family:'DM Mono';font-size:9px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--light);padding:20px 20px 10px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--grey2);}
+
+/* ── Cards ── */
+.card{background:var(--card);border-radius:var(--r);margin:0 16px 10px;overflow:hidden;box-shadow:0 1px 3px rgba(44,24,16,.06);}
+.card-body{padding:16px;}
+
+/* ── HOME screen ── */
+.home-hero{background:linear-gradient(135deg,#0D2818 0%,#1A7A3C 50%,#1A6FA8 100%);padding:28px 20px 24px;position:relative;overflow:hidden;}
+.home-hero::before{content:'';position:absolute;right:-20px;top:-20px;width:160px;height:160px;background:var(--or);opacity:.07;border-radius:50%;}
+.home-hero::after{content:'⚽';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:80px;opacity:.08;}
+.home-hero-eyebrow{font-family:'DM Mono';font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
+.home-hero-name{font-family:'Barlow Condensed';font-size:40px;font-weight:800;color:#fff;line-height:1;margin-bottom:4px;}
+.home-hero-sub{font-size:13px;color:#B09080;margin-bottom:20px;}
+.home-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.home-stat{background:rgba(255,255,255,.07);border-radius:10px;padding:12px;text-align:center;}
+.home-stat-v{font-family:'Barlow Condensed';font-size:32px;font-weight:800;color:var(--or);line-height:1;}
+.home-stat-l{font-family:'DM Mono';font-size:8px;color:var(--light);letter-spacing:1px;margin-top:3px;}
+
+.last-match{padding:16px 20px;}
+.last-match-label{font-family:'DM Mono';font-size:9px;color:var(--light);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.last-match-card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(44,24,16,.06);}
+.lm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.lm-serial{font-family:'DM Mono';font-size:10px;color:var(--light);}
+.lm-result{padding:3px 10px;border-radius:99px;font-family:'Barlow Condensed';font-size:14px;font-weight:700;letter-spacing:1px;}
+.lm-result.D{background:var(--red-l);color:var(--red);}
+.lm-result.V{background:var(--green-l);color:var(--green);}
+.lm-result.E{background:#FFF9C4;color:#865a10;}
+.lm-score{font-family:'Barlow Condensed';font-size:52px;font-weight:800;color:var(--dark);line-height:1;text-align:center;margin:4px 0;}
+.lm-opp{font-size:13px;color:var(--mid);text-align:center;margin-bottom:10px;}
+.lm-scorers{display:flex;flex-wrap:wrap;gap:6px;}
+.lm-scorer{display:flex;align-items:center;gap:5px;background:var(--or-xl);border-radius:99px;padding:4px 10px;}
+.lm-scorer-av{width:20px;height:20px;border-radius:50%;background:var(--or);color:#fff;font-family:'DM Mono';font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.lm-scorer-name{font-size:11px;font-weight:600;color:var(--dark);}
+.lm-scorer-g{font-family:'Barlow Condensed';font-size:13px;font-weight:700;color:var(--or);margin-left:2px;}
+
+/* ── ARTILHEIROS screen ── */
+.art-top-card{background:linear-gradient(135deg,#0D2818,#1A7A3C);margin:16px 16px 0;border-radius:var(--r);padding:20px;display:flex;align-items:center;gap:16px;}
+.art-top-av{width:64px;height:64px;border-radius:50%;background:var(--or);color:#fff;font-family:'Barlow Condensed';font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;border:3px solid var(--gold);flex-shrink:0;}
+.art-top-info{flex:1;}
+.art-top-eyebrow{font-family:'DM Mono';font-size:8px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.art-top-name{font-family:'Barlow Condensed';font-size:28px;font-weight:800;color:#fff;line-height:1;}
+.art-top-pos{font-size:12px;color:var(--light);margin-top:2px;}
+.art-top-goals{font-family:'Barlow Condensed';font-size:56px;font-weight:800;color:var(--or);line-height:1;}
+
+.art-list{padding:0 16px;}
+.art-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border-radius:12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(44,24,16,.05);}
+.art-row.gold-row{background:var(--gold-l);border:1px solid #E8D090;}
+.art-rank{font-family:'Barlow Condensed';font-size:20px;font-weight:700;color:var(--light);width:24px;text-align:center;flex-shrink:0;}
+.art-rank.gold{color:var(--gold);}
+.art-rank.silver{color:var(--silver);}
+.art-rank.bronze{color:var(--bronze);}
+.art-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono';font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.art-info{flex:1;min-width:0;}
+.art-name{font-size:14px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.art-pos{font-size:11px;color:var(--mid);}
+.art-bar-wrap{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
+.art-bar-bg{height:5px;background:var(--grey2);border-radius:99px;overflow:hidden;}
+.art-bar-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.art-goals{font-family:'Barlow Condensed';font-size:28px;font-weight:800;color:var(--or);line-height:1;flex-shrink:0;width:40px;text-align:right;}
+.art-goals.small{font-size:22px;}
+.art-saiu{font-family:'DM Mono';font-size:8px;color:var(--silver);margin-left:4px;}
+
+/* ── JOGOS screen ── */
+.jogos-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px 16px 0;}
+.jg-stat{background:var(--card);border-radius:12px;padding:12px;text-align:center;box-shadow:0 1px 3px rgba(44,24,16,.05);}
+.jg-stat-v{font-family:'Barlow Condensed';font-size:36px;font-weight:800;line-height:1;}
+.jg-stat-v.v{color:var(--green);}
+.jg-stat-v.e{color:#C9933A;}
+.jg-stat-v.d{color:var(--red);}
+.jg-stat-l{font-family:'DM Mono';font-size:8px;color:var(--light);letter-spacing:1px;margin-top:2px;}
+
+.jogo-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border-radius:12px;margin:0 16px 8px;box-shadow:0 1px 3px rgba(44,24,16,.05);cursor:pointer;transition:transform .1s;}
+.jogo-item:active{transform:scale(.98);}
+.jogo-serial{font-family:'DM Mono';font-size:10px;color:var(--light);width:28px;flex-shrink:0;}
+.jogo-info{flex:1;min-width:0;}
+.jogo-opp{font-size:14px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.jogo-date{font-family:'DM Mono';font-size:10px;color:var(--light);margin-top:2px;}
+.jogo-score{font-family:'Barlow Condensed';font-size:22px;font-weight:700;color:var(--dark);flex-shrink:0;}
+.jogo-result{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed';font-size:13px;font-weight:700;flex-shrink:0;}
+.jogo-result.V{background:var(--green-l);color:var(--green);}
+.jogo-result.D{background:var(--red-l);color:var(--red);}
+.jogo-result.E{background:#FFF9C4;color:#865a10;}
+.jogo-result.nd{background:var(--grey);color:var(--light);}
+
+/* ── ELENCO screen ── */
+.elenco-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px;}
+.player-card{background:var(--card);border-radius:14px;padding:14px 12px;box-shadow:0 1px 3px rgba(44,24,16,.05);display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform .1s;}
+.player-card:active{transform:scale(.96);}
+.player-card.saiu{opacity:.5;}
+.pc-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono';font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;position:relative;}
+.pc-cap{position:absolute;top:-2px;right:-2px;width:16px;height:16px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;border:2px solid var(--card);}
+.pc-name{font-size:13px;font-weight:600;color:var(--dark);line-height:1.2;margin-bottom:3px;}
+.pc-nick{font-family:'DM Mono';font-size:10px;color:var(--mid);}
+.pc-pos{display:inline-block;background:var(--or-l);color:var(--or-d);font-family:'DM Mono';font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;margin-top:5px;}
+.pc-goals{font-family:'Barlow Condensed';font-size:13px;color:var(--light);margin-top:4px;}
+.pc-goals span{color:var(--or);font-weight:700;}
+.pc-badge{position:absolute;bottom:-2px;left:-2px;font-size:10px;}
+
+/* ── Player modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(13,40,24,.65);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-sheet{background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-height:85vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.modal-overlay.open .modal-sheet{transform:translateY(0);}
+.modal-handle{width:40px;height:4px;background:var(--grey2);border-radius:99px;margin:12px auto 0;}
+.modal-header{padding:20px 20px 16px;border-bottom:1px solid var(--grey2);display:flex;align-items:center;gap:16px;}
+.modal-av{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono';font-size:20px;font-weight:700;color:#fff;flex-shrink:0;}
+.modal-name{font-family:'Barlow Condensed';font-size:32px;font-weight:800;color:var(--dark);line-height:1;}
+.modal-nick{font-size:13px;color:var(--mid);}
+.modal-pos-badge{display:inline-flex;align-items:center;gap:4px;background:var(--or-l);color:var(--or-d);font-family:'DM Mono';font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;margin-top:4px;}
+.modal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:16px 20px;}
+.modal-stat{background:var(--card);border-radius:12px;padding:12px;text-align:center;}
+.modal-stat-v{font-family:'Barlow Condensed';font-size:28px;font-weight:800;color:var(--or);line-height:1;}
+.modal-stat-l{font-family:'DM Mono';font-size:8px;color:var(--light);letter-spacing:1px;margin-top:2px;}
+.modal-close{position:absolute;top:20px;right:20px;width:32px;height:32px;border-radius:50%;background:var(--grey);border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+
+/* ── Loading state ── */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px;}
+.loading-ball{font-size:32px;animation:bounce .7s infinite alternate;}
+.loading-txt{font-family:'DM Mono';font-size:11px;color:var(--light);letter-spacing:1px;}
+@keyframes bounce{to{transform:translateY(-12px);}}
+
+/* ── Refresh button ── */
+.refresh-btn{display:flex;align-items:center;gap:6px;background:var(--or-xl);border:1px solid var(--or-l);color:var(--or);font-family:'DM Mono';font-size:10px;padding:6px 14px;border-radius:99px;cursor:pointer;margin:0 auto 4px;transition:background .15s;}
+.refresh-btn:active{background:var(--or-l);}
+
+@media(max-width:380px){
+  .elenco-grid{grid-template-columns:1fr;}
+  .home-stats-row{grid-template-columns:repeat(3,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- Splash -->
+<div id="splash">
+  <svg class="splash-star" viewBox="0 0 80 80" fill="none">
+    <polygon points="40,5 49,31 77,31 55,49 63,75 40,58 17,75 25,49 3,31 31,31" fill="#C85A1A"/>
+    <polygon points="40,18 46,35 64,35 50,45 56,62 40,52 24,62 30,45 16,35 34,35" fill="#2C1810" opacity=".4"/>
+  </svg>
+  <div class="splash-club">Estrela Mecânica FC</div>
+  <div class="splash-title">FUTGEN</div>
+  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <div class="app-header">
+    <div class="header-top">
+      <div>
+        <div class="header-club">Estrela Mecânica FC</div>
+        <div class="header-title">FUTGEN</div>
+      </div>
+      <div class="header-badge" id="data-badge">ao vivo</div>
+    </div>
+    <div class="header-season">Temporada 2025–2026 · J1–J18</div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showScreen('home',this)">
+      <div class="nav-indicator"></div>
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Início</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('artilheiros',this)">
+      <div class="nav-indicator"></div>
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Gols</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('jogos',this)">
+      <div class="nav-indicator"></div>
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Jogos</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('elenco',this)">
+      <div class="nav-indicator"></div>
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Elenco</span>
+    </button>
+  </nav>
+
+  <!-- ── HOME ── -->
+  <div class="screen active" id="screen-home">
+    <div class="home-hero">
+      <div class="home-hero-eyebrow">Temporada 2025–2026</div>
+      <div class="home-hero-name">ESTRELA<br>MECÂNICA FC</div>
+      <div class="home-hero-sub">Foz do Iguaçu, PR · Fundado 2025</div>
+      <div class="home-stats-row">
+        <div class="home-stat"><div class="home-stat-v" id="h-wins">13</div><div class="home-stat-l">Vitórias</div></div>
+        <div class="home-stat"><div class="home-stat-v" id="h-draws">2</div><div class="home-stat-l">Empates</div></div>
+        <div class="home-stat"><div class="home-stat-v" id="h-losses">3</div><div class="home-stat-l">Derrotas</div></div>
+      </div>
+    </div>
+
+    <div class="last-match">
+      <div class="last-match-label">Último jogo</div>
+      <div class="last-match-card">
+        <div class="lm-top">
+          <span class="lm-serial">J18 · 25/ago/2026</span>
+          <span class="lm-result D">DERROTA</span>
+        </div>
+        <div class="lm-score">1 × 6</div>
+        <div class="lm-opp">Time do Pikachu</div>
+        <div class="lm-scorers">
+          <div class="lm-scorer"><div class="lm-scorer-av">RB</div><div class="lm-scorer-name">Renato</div><div class="lm-scorer-g">×1</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Artilheiro da temporada</div>
+    <div style="padding:0 16px 16px;">
+      <div class="art-top-card">
+        <div class="art-top-av">AF</div>
+        <div class="art-top-info">
+          <div class="art-top-eyebrow">🥇 Artilheiro</div>
+          <div class="art-top-name">Anderson Felipe</div>
+          <div class="art-top-pos">Atacante · #10</div>
+        </div>
+        <div class="art-top-goals">30</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ARTILHEIROS ── -->
+  <div class="screen" id="screen-artilheiros">
+    <div class="section-label" style="padding-top:16px;">Ranking de gols · Temporada 2025–2026</div>
+
+    <div class="art-list" id="art-list-container">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <!-- ── JOGOS ── -->
+  <div class="screen" id="screen-jogos">
+    <div class="jogos-summary">
+      <div class="jg-stat"><div class="jg-stat-v v">13</div><div class="jg-stat-l">Vitórias</div></div>
+      <div class="jg-stat"><div class="jg-stat-v e">2</div><div class="jg-stat-l">Empates</div></div>
+      <div class="jg-stat"><div class="jg-stat-v d">3</div><div class="jg-stat-l">Derrotas</div></div>
+    </div>
+    <div class="section-label">Histórico · J1 → J18</div>
+    <div id="jogos-list"><!-- rendered by JS --></div>
+  </div>
+
+  <!-- ── ELENCO ── -->
+  <div class="screen" id="screen-elenco">
+    <div class="section-label" style="padding-top:16px;">Elenco · 23 atletas</div>
+    <div class="elenco-grid" id="elenco-grid"><!-- rendered by JS --></div>
+  </div>
+</div>
+
+<!-- Player modal -->
+<div class="modal-overlay" id="player-modal" onclick="closeModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="position:relative;">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-header">
+        <div class="modal-av" id="m-av"></div>
+        <div>
+          <div class="modal-name" id="m-name"></div>
+          <div class="modal-nick" id="m-nick"></div>
+          <div class="modal-pos-badge" id="m-pos"></div>
+        </div>
+      </div>
+      <div class="modal-stats">
+        <div class="modal-stat"><div class="modal-stat-v" id="m-goals">—</div><div class="modal-stat-l">Gols</div></div>
+        <div class="modal-stat"><div class="modal-stat-v" id="m-group">—</div><div class="modal-stat-l">Grupo</div></div>
+        <div class="modal-stat"><div class="modal-stat-v" id="m-jersey">—</div><div class="modal-stat-l">Camisa</div></div>
+      </div>
+      <div style="padding:0 20px 32px;font-size:13px;color:var(--mid);line-height:1.5;" id="m-notes"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────
+// NOTE: Phase 1 = static data. Replace fetch() calls with GAS endpoint when live.
+// GAS endpoint: const GAS_URL = 'https://script.google.com/macros/s/YOUR_ID/exec';
+
+const ARTILHEIROS = [
+  {id:'PLR_001',ini:'AF',name:'Anderson Felipe', nick:'Anderson',  pos:'AT',  jersey:'#10', group:'EstAzul',    goals:30, status:'titular'},
+  {id:'PLR_014',ini:'AP',name:'Alex Passala',    nick:'Alex',     pos:'MA',  jersey:'',    group:'Free Agent', goals:13, status:'titular'},
+  {id:'PLR_002',ini:'MC',name:'Martin Cordoba',  nick:'Martin',   pos:'MC',  jersey:'#5',  group:'Free Agent', goals:7,  status:'titular'},
+  {id:'PLR_003',ini:'DC',name:'Daniel Carlos',   nick:'Daniel',   pos:'MC',  jersey:'#8',  group:'Free Agent', goals:7,  status:'titular'},
+  {id:'PLR_013',ini:'YF',name:'Yan Fernandes',   nick:'Yan',      pos:'MC',  jersey:'#99', group:'EstAzul',    goals:7,  status:'titular'},
+  {id:'PLR_015',ini:'JV',name:'Jadson Vidal',    nick:'Jajá',     pos:'MA',  jersey:'',    group:'Free Agent', goals:6,  status:'titular'},
+  {id:'PLR_021',ini:'LK',name:'Lucas Kazmierczak',nick:'Lucas K.',pos:'MC',  jersey:'',    group:'Free Agent', goals:6,  status:'saiu'},
+  {id:'PLR_006',ini:'FM',name:'Fábio Mafald',    nick:'Fabio',    pos:'ZG',  jersey:'#22', group:'EstAzul',    goals:6,  status:'titular'},
+  {id:'PLR_004',ini:'RC',name:'Rodrigo Contreras',nick:'Rodrigo', pos:'LE',  jersey:'#7',  group:'Free Agent', goals:5,  status:'titular'},
+  {id:'PLR_022',ini:'TN',name:'Tony',            nick:'Tony',     pos:'MC',  jersey:'',    group:'Free Agent', goals:2,  status:'titular'},
+  {id:'PLR_016',ini:'CR',name:'Cremoso',         nick:'Cremoso',  pos:'MC',  jersey:'',    group:'Free Agent', goals:1,  status:'titular'},
+  {id:'PLR_020',ini:'JZ',name:'Juárez',          nick:'Juárez',   pos:'ZG',  jersey:'',    group:'Free Agent', goals:1,  status:'peneira'},
+  {id:'PLR_1038',ini:'RB',name:'Renato Barbosa', nick:'Renato',   pos:'—',   jersey:'1038',group:'Free Agent', goals:1,  status:'titular'},
+];
+
+const PLAYERS = [
+  {id:'PLR_001',ini:'AF',name:'Anderson Felipe', nick:'Anderson',  pos:'AT',  jersey:'#10', group:'EstAzul',    goals:30, status:'titular',   note:'Artilheiro histórico · Capitão emocional'},
+  {id:'PLR_002',ini:'MC',name:'Martin Cordoba',  nick:'Martin',   pos:'MC',  jersey:'#5',  group:'Free Agent', goals:7,  status:'titular',   note:'Organizador · Presidente'},
+  {id:'PLR_003',ini:'DC',name:'Daniel Carlos',   nick:'Daniel',   pos:'MC',  jersey:'#8',  group:'Free Agent', goals:7,  status:'titular',   note:''},
+  {id:'PLR_004',ini:'RC',name:'Rodrigo Contreras',nick:'Rodrigo', pos:'LE',  jersey:'#7',  group:'Free Agent', goals:5,  status:'titular',   note:''},
+  {id:'PLR_005',ini:'CD',name:'C. Daniel Marcelino',nick:'C.Daniel',pos:'ZG',jersey:'',    group:'Free Agent', goals:0,  status:'titular',   note:''},
+  {id:'PLR_006',ini:'FM',name:'Fábio Mafald',    nick:'Fabio',    pos:'ZG',  jersey:'#22', group:'EstAzul',    goals:6,  status:'titular',   note:'Libero, sai para atacar'},
+  {id:'PLR_007',ini:'HC',name:'Hudson Costa',    nick:'Hudy',     pos:'ZG',  jersey:'',    group:'EstAzul',    goals:0,  status:'titular',   note:''},
+  {id:'PLR_008',ini:'JR',name:'João Ricardo',    nick:'João R.',  pos:'ZC',  jersey:'',    group:'Free Agent', goals:0,  status:'titular',   note:''},
+  {id:'PLR_009',ini:'CL',name:'Cleyton',         nick:'Cleyton',  pos:'ZG',  jersey:'',    group:'EstAzul',    goals:0,  status:'titular',   note:''},
+  {id:'PLR_010',ini:'RL',name:'Renan Lucena',    nick:'Renan',    pos:'GL',  jersey:'',    group:'Free Agent', goals:0,  status:'titular',   note:'Goleiro titular'},
+  {id:'PLR_011',ini:'RG',name:'Ricardo Guedes',  nick:'Guedes',   pos:'GL',  jersey:'',    group:'Free Agent', goals:0,  status:'titular',   note:'Goleiro reserva'},
+  {id:'PLR_012',ini:'DM',name:'Daniel Mota',     nick:'Dan.Mota', pos:'ZG',  jersey:'',    group:'Free Agent', goals:0,  status:'titular',   note:''},
+  {id:'PLR_013',ini:'YF',name:'Yan Fernandes',   nick:'Yan',      pos:'MC',  jersey:'#99', group:'EstAzul',    goals:7,  status:'titular',   note:'Hat-trick vs Curitibano (J15)'},
+  {id:'PLR_014',ini:'AP',name:'Alex Passala',    nick:'Alex',     pos:'MA',  jersey:'',    group:'Free Agent', goals:13, status:'titular',   note:''},
+  {id:'PLR_015',ini:'JV',name:'Jadson Vidal',    nick:'Jajá',     pos:'MA',  jersey:'',    group:'Free Agent', goals:6,  status:'titular',   note:''},
+  {id:'PLR_016',ini:'CR',name:'Cremoso',         nick:'Cremoso',  pos:'MC',  jersey:'',    group:'Free Agent', goals:1,  status:'titular',   note:''},
+  {id:'PLR_017',ini:'RA',name:'Rubens Azevedo',  nick:'Rubens',   pos:'MC',  jersey:'',    group:'EstAzul',    goals:0,  status:'fora_temp', note:'Fora temporariamente'},
+  {id:'PLR_018',ini:'JB',name:'João Bastos',     nick:'Livinho',  pos:'LD',  jersey:'',    group:'Free Agent', goals:0,  status:'titular',   note:''},
+  {id:'PLR_019',ini:'LU',name:'Luciano',         nick:'Luciano',  pos:'MC',  jersey:'',    group:'Free Agent', goals:0,  status:'peneira',   note:'Em avaliação'},
+  {id:'PLR_020',ini:'JZ',name:'Juárez',          nick:'Juárez',   pos:'ZG',  jersey:'',    group:'Free Agent', goals:1,  status:'peneira',   note:'Em avaliação · gol histórico registrado'},
+  {id:'PLR_021',ini:'LK',name:'Lucas Kazmierczak',nick:'Lucas K.',pos:'MC',  jersey:'',    group:'Free Agent', goals:6,  status:'saiu',      note:'Saiu do clube · Hat-trick em 13/03'},
+  {id:'PLR_022',ini:'TN',name:'Tony',            nick:'Tony',     pos:'MC',  jersey:'',    group:'Free Agent', goals:2,  status:'titular',   note:'Estreou no J16 · gol no J17 vs Paraguai'},
+  {id:'PLR_1038',ini:'RB',name:'Renato Barbosa', nick:'Renato',   pos:'—',   jersey:'1038',group:'Free Agent', goals:1,  status:'titular',   note:'Estreia no J18 · 25/ago/2026 · Campo Orlando · gol na estreia'},
+];
+
+const JOGOS = [
+  {serial:'J1', date:'24/fev/2025', opp:'Nova União',        gf:3,   ga:2,  result:'V'},
+  {serial:'J2', date:'27/fev/2025', opp:'Nova União',        gf:null,ga:null,result:'?'},
+  {serial:'J3', date:'06/mar/2025', opp:'Nova União',        gf:11,  ga:6,  result:'V'},
+  {serial:'J4', date:'13/mar/2025', opp:'Nova União',        gf:5,   ga:3,  result:'V'},
+  {serial:'J5', date:'20/mar/2025', opp:'Nova União',        gf:9,   ga:4,  result:'V'},
+  {serial:'J6', date:'27/mar/2025', opp:'Paraguaios',        gf:3,   ga:2,  result:'E'},
+  {serial:'J7', date:'03/abr/2025', opp:'Nova União',        gf:3,   ga:2,  result:'V'},
+  {serial:'J8', date:'09/abr/2025', opp:'—',                 gf:null,ga:null,result:'?'},
+  {serial:'J9', date:'29/abr/2025', opp:'Desconhecido',      gf:null,ga:null,result:'E'},
+  {serial:'J10',date:'01/jul/2025', opp:'Desconhecido',      gf:9,   ga:8,  result:'V'},
+  {serial:'J11',date:'30/jul/2025', opp:'Desconhecido',      gf:10,  ga:0,  result:'V'},
+  {serial:'J12',date:'01/ago/2025', opp:'Time do Edson',     gf:3,   ga:7,  result:'D'},
+  {serial:'J13',date:'08/ago/2025', opp:'Time do Edson',     gf:5,   ga:2,  result:'V'},
+  {serial:'J14',date:'01/out/2025', opp:'Desconhecido',      gf:null,ga:null,result:'V'},
+  {serial:'J15',date:'15/abr/2025', opp:'Time Curitibano',   gf:6,   ga:5,  result:'V'},
+  {serial:'J16',date:'03/jun/2026', opp:'Time Curitibano',   gf:6,   ga:7,  result:'D'},
+  {serial:'J17',date:'18/jun/2026', opp:'Paraguai',          gf:2,   ga:1,  result:'V'},
+  {serial:'J18',date:'25/ago/2026', opp:'Time do Pikachu',   gf:1,   ga:6,  result:'D'},
+];
+
+// ── Avatar colors ────────────────────────────────────────────────────────
+const AV_COLORS = ['#C85A1A','#8B3A0F','#1A7A3C','#2C1810','#C9933A','#8B5E3C','#1e6fa8','#7A5A4A'];
+function avColor(id){ const n=parseInt(id.replace('PLR_',''));return AV_COLORS[n%AV_COLORS.length]; }
+
+// ── Render artilheiros ───────────────────────────────────────────────────
+function renderArtilheiros(){
+  const max = ARTILHEIROS[0].goals;
+  const rankColors = ['gold','silver','bronze'];
+  const barColors  = ['#C9933A','#8A8A8A','#8B5E3C'];
+  const html = ARTILHEIROS.map((p,i)=>{
+    const rank = i+1;
+    const pct  = (p.goals/max*100).toFixed(1);
+    const rankCls = rankColors[i]||'';
+    const barCol  = barColors[i]||'#C85A1A';
+    const isGold  = i===0;
+    const saiu    = p.status==='saiu';
+    return `<div class="art-row${isGold?' gold-row':''}">
+      <div class="art-rank ${rankCls}">${rank}</div>
+      <div class="art-av" style="background:${avColor(p.id)}">${p.ini}</div>
+      <div class="art-info">
+        <div class="art-name">${p.name}${saiu?'<span class="art-saiu">saiu</span>':''}</div>
+        <div class="art-pos">${p.pos}${p.jersey?' · '+p.jersey:''}</div>
+        <div class="art-bar-bg" style="margin-top:6px">
+          <div class="art-bar-fill" style="width:${pct}%;background:${barCol}"></div>
+        </div>
+      </div>
+      <div class="art-goals${rank>2?' small':''}">${p.goals}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('art-list-container').innerHTML = html;
+}
+
+// ── Render jogos ─────────────────────────────────────────────────────────
+function renderJogos(){
+  // reverse for latest first
+  const html = [...JOGOS].reverse().map(j=>{
+    const score = (j.gf!==null && j.gf!==undefined) ? `${j.gf}×${j.ga}` : '—×—';
+    const rCls  = ['V','D','E'].includes(j.result)?j.result:'nd';
+    const rLabel= j.result==='?'?'—':j.result;
+    return `<div class="jogo-item">
+      <div class="jogo-serial">${j.serial}</div>
+      <div class="jogo-info">
+        <div class="jogo-opp">${j.opp}</div>
+        <div class="jogo-date">${j.date}</div>
+      </div>
+      <div class="jogo-score">${score}</div>
+      <div class="jogo-result ${rCls}">${rLabel}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('jogos-list').innerHTML = html;
+}
+
+// ── Render elenco ────────────────────────────────────────────────────────
+function renderElenco(){
+  const order = ['titular','peneira','fora_temp','saiu'];
+  const sorted = [...PLAYERS].sort((a,b)=>order.indexOf(a.status)-order.indexOf(b.status)||b.goals-a.goals);
+  const posLabel = {GL:'Goleiro',ZG:'Zagueiro',ZC:'Zag.Central',LD:'Lat.Dir',LE:'Lat.Esq',MC:'Meia',MA:'Meia-Atac',AT:'Atacante'};
+  const html = sorted.map(p=>{
+    const isSaiu = p.status==='saiu';
+    const isPeneira = p.status==='peneira';
+    const isCap = p.id==='PLR_001';
+    const goalsStr = p.goals>0?`<div class="pc-goals">⚽ <span>${p.goals}</span> gols</div>`:'';
+    let badge = '';
+    if(isPeneira) badge='<div class="pc-badge" title="Em avaliação">🔍</div>';
+    if(p.status==='fora_temp') badge='<div class="pc-badge" title="Fora temporariamente">🤕</div>';
+    return `<div class="player-card${isSaiu?' saiu':''}" onclick="openModal('${p.id}')">
+      <div class="pc-av" style="background:${avColor(p.id)};position:relative">
+        ${p.ini}
+        ${isCap?'<div class="pc-cap">©</div>':''}
+        ${badge}
+      </div>
+      <div class="pc-name">${p.name}</div>
+      <div class="pc-nick">${p.nick}</div>
+      <div class="pc-pos">${posLabel[p.pos]||p.pos}</div>
+      ${goalsStr}
+    </div>`;
+  }).join('');
+  document.getElementById('elenco-grid').innerHTML = html;
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────
+function openModal(id){
+  const p = PLAYERS.find(x=>x.id===id);
+  if(!p) return;
+  const posLabel = {GL:'Goleiro',ZG:'Zagueiro',ZC:'Zag.Central',LD:'Lat.Dir',LE:'Lat.Esq',MC:'Meia',MA:'Meia-Atac',AT:'Atacante'};
+  document.getElementById('m-av').textContent = p.ini;
+  document.getElementById('m-av').style.background = avColor(p.id);
+  document.getElementById('m-name').textContent = p.name;
+  document.getElementById('m-nick').textContent = p.nick + (p.jersey?' · '+p.jersey:'');
+  document.getElementById('m-pos').textContent = posLabel[p.pos]||p.pos;
+  document.getElementById('m-goals').textContent = p.goals||'—';
+  document.getElementById('m-group').textContent = p.group==='EstAzul'?'Est.Azul':'Free Agent';
+  document.getElementById('m-jersey').textContent = p.jersey||'—';
+  document.getElementById('m-notes').textContent = p.note||(p.status==='saiu'?'Saiu do clube':'');
+  document.getElementById('player-modal').classList.add('open');
+}
+function closeModal(e){
+  if(!e||e.target===document.getElementById('player-modal'))
+    document.getElementById('player-modal').classList.remove('open');
+}
+
+// ── Nav ───────────────────────────────────────────────────────────────────
+function showScreen(id, btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+renderArtilheiros();
+renderJogos();
+renderElenco();
+
+// Splash dismiss
+setTimeout(()=>document.getElementById('splash').classList.add('hide'), 2000);
+</script>
+</body>
+</html>
