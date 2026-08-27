@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FutGen · Manager · Estrela Mecânica FC</title>
+<title>FutGen · Manager V2 · Estrela Mecânica FC</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -179,7 +179,8 @@ html,body{min-height:100vh;background:var(--bg);font-family:'DM Sans',sans-serif
 .jogo-info{flex:1;min-width:0;}
 .jogo-opp{font-size:13px;font-weight:600;color:var(--dark);}
 .jogo-meta{font-family:'DM Mono';font-size:10px;color:var(--light);margin-top:2px;}
-.jogo-score{font-family:'Barlow Condensed';font-size:18px;font-weight:800;color:var(--dark);flex-shrink:0;}
+.jogo-placar{font-family:var(--f-display);font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.jogo-score{font-family:var(--f-display);font-size:18px;font-weight:700;color:var(--ink);flex-shrink:0;}
 .jogo-tags{display:flex;gap:4px;margin-top:4px;}
 .jtag{font-size:9px;font-weight:600;letter-spacing:.3px;padding:2px 6px;border-radius:4px;background:var(--grey);color:var(--mid);}
 .jtag-green{background:var(--green-l);color:var(--green);}
@@ -485,7 +486,7 @@ html,body{min-height:100vh;background:var(--bg);font-family:'DM Sans',sans-serif
         <div class="foot-role">Presidente · PLR_002</div>
       </div>
     </div>
-    <div class="sidebar-version">FutGen Manager V1 · Jun 2026</div>
+    <div class="sidebar-version">FutGen Manager V2 · Premium Pitch</div>
   </div>
 </aside>
 
@@ -894,6 +895,12 @@ const PLAYERS=[
   {id:'PLR_022',ini:'TN',name:'Tony',pos:'MC',grupo:'Free Agent',status:'titular',isento:false,jogos:2,gols:2,rating:'C'},
   {id:'PLR_1038',ini:'RB',name:'Renato Barbosa',pos:'—',grupo:'Free Agent',status:'titular',isento:false,jogos:1,gols:1,rating:'—'},
 ];
+
+// ── Placar helper ─────────────────────────────────────────────────────────
+function placar(j){
+  if(j.gf!=null) return `Estrela Mecânica ${j.gf} × ${j.ga} ${j.opp}`;
+  return `Estrela Mecânica × ${j.opp}`;
+}
 
 // ── Nav ─────────────────────────────────────────────────────────────────
 function goScreen(id, title, navId){
