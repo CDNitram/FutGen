@@ -400,14 +400,14 @@ html,body{min-height:100vh;background:var(--bg);font-family:var(--fu);color:var(
             <div class="card-body">
               <div class="sec-lbl">Temporada 2025–2026</div>
               <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;">
-                <div><div style="font-family:var(--fd);font-size:28px;font-weight:700;color:var(--green)">13</div><div style="font-family:var(--fm);font-size:8px;color:var(--ink4);letter-spacing:1px">VITÓRIAS</div></div>
-                <div><div style="font-family:var(--fd);font-size:28px;font-weight:700;color:var(--amber)">2</div><div style="font-family:var(--fm);font-size:8px;color:var(--ink4);letter-spacing:1px">EMPATES</div></div>
-                <div><div style="font-family:var(--fd);font-size:28px;font-weight:700;color:var(--red)">3</div><div style="font-family:var(--fm);font-size:8px;color:var(--ink4);letter-spacing:1px">DERROTAS</div></div>
+                <div><div class="seas-num" style="font-family:var(--fd);font-size:28px;font-weight:700;color:var(--green)">—</div><div style="font-family:var(--fm);font-size:8px;color:var(--ink4);letter-spacing:1px">VITÓRIAS</div></div>
+                <div><div class="seas-num" style="font-family:var(--fd);font-size:28px;font-weight:700;color:var(--amber)">—</div><div style="font-family:var(--fm);font-size:8px;color:var(--ink4);letter-spacing:1px">EMPATES</div></div>
+                <div><div class="seas-num" style="font-family:var(--fd);font-size:28px;font-weight:700;color:var(--red)">—</div><div style="font-family:var(--fm);font-size:8px;color:var(--ink4);letter-spacing:1px">DERROTAS</div></div>
               </div>
               <div style="margin-top:12px;height:6px;border-radius:99px;background:var(--border);overflow:hidden;display:flex;">
-                <div style="width:72%;background:var(--green)"></div>
-                <div style="width:11%;background:var(--amber)"></div>
-                <div style="width:17%;background:var(--red)"></div>
+                <div class="seas-bar-v" style="width:0%;background:var(--green);transition:width .6s"></div>
+                <div class="seas-bar-e" style="width:0%;background:var(--amber);transition:width .6s"></div>
+                <div class="seas-bar-d" style="width:0%;background:var(--red);transition:width .6s"></div>
               </div>
             </div>
           </div>
@@ -618,60 +618,100 @@ html,body{min-height:100vh;background:var(--bg);font-family:var(--fu);color:var(
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const JOGOS=[
-  {serial:'J18',date:'25/ago/2026',opp:'Time do Pikachu',gf:1,ga:6,result:'D',campo:'Campo do Orlando',pagantes:['RB'],isentos:[],total:150},
-  {serial:'J17',date:'18/jun/2026',opp:'Paraguai',gf:2,ga:1,result:'V',campo:'SEST SENAT',pagantes:['AF','MC','DC','RC','FM','HC','YF','AP','JV','CR','TN','JB'],isentos:['RL'],total:150},
-  {serial:'J16',date:'03/jun/2026',opp:'Time Curitibano',gf:6,ga:7,result:'D',campo:'SEST SENAT',pagantes:['AF','MC','DC','RC','FM','YF','AP','JV','TN'],isentos:['RL'],total:150},
-  {serial:'J15',date:'15/abr/2025',opp:'Time Curitibano',gf:6,ga:5,result:'V',campo:'Campo Curitibano',pagantes:['AF','MC','DC','LU','JZ','CR','RC','HC','YF'],isentos:['RL'],total:150},
-  {serial:'J14',date:'01/out/2025',opp:'Desconhecido',gf:null,ga:null,result:'V',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J13',date:'08/ago/2025',opp:'Time do Edson',gf:5,ga:2,result:'V',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J12',date:'01/ago/2025',opp:'Time do Edson',gf:3,ga:7,result:'D',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J11',date:'30/jul/2025',opp:'Desconhecido',gf:10,ga:0,result:'V',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J10',date:'01/jul/2025',opp:'Desconhecido',gf:9,ga:8,result:'V',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J9',date:'29/abr/2025',opp:'Desconhecido',gf:null,ga:null,result:'E',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J8',date:'09/abr/2025',opp:'—',gf:null,ga:null,result:'?',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J7',date:'03/abr/2025',opp:'Nova União',gf:3,ga:2,result:'V',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J6',date:'27/mar/2025',opp:'Paraguaios',gf:3,ga:2,result:'E',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J5',date:'20/mar/2025',opp:'Nova União',gf:9,ga:4,result:'V',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J4',date:'13/mar/2025',opp:'Nova União',gf:5,ga:3,result:'V',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J3',date:'06/mar/2025',opp:'Nova União',gf:11,ga:6,result:'V',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J2',date:'27/fev/2025',opp:'Nova União',gf:null,ga:null,result:'?',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-  {serial:'J1',date:'24/fev/2025',opp:'Nova União',gf:3,ga:2,result:'V',campo:'SEST SENAT',pagantes:[],isentos:[],total:150},
-];
-const ARTS=[
-  {ini:'AF',name:'Anderson Felipe',pos:'AT',goals:30},
-  {ini:'AP',name:'Alex Passala',pos:'MA',goals:13},
-  {ini:'MC',name:'Martin Cordoba',pos:'MC',goals:7},
-  {ini:'DC',name:'Daniel Carlos',pos:'MC',goals:7},
-  {ini:'YF',name:'Yan Fernandes',pos:'MC',goals:7},
-  {ini:'JV',name:'Jadson Vidal',pos:'MA',goals:6},
-  {ini:'FM',name:'Fábio Mafald',pos:'ZG',goals:6},
-];
-const PLAYERS=[
-  {id:'PLR_001',ini:'AF',name:'Anderson Felipe',pos:'AT',grupo:'EstAzul',status:'titular',isento:false,jogos:8,gols:30,rating:'S'},
-  {id:'PLR_002',ini:'MC',name:'Martin Cordoba',pos:'MC',grupo:'Free Agent',status:'titular',isento:false,jogos:10,gols:7,rating:'B'},
-  {id:'PLR_003',ini:'DC',name:'Daniel Carlos',pos:'MC',grupo:'Free Agent',status:'titular',isento:false,jogos:10,gols:7,rating:'B'},
-  {id:'PLR_004',ini:'RC',name:'Rodrigo Contreras',pos:'LE',grupo:'Free Agent',status:'titular',isento:false,jogos:6,gols:5,rating:'C'},
-  {id:'PLR_005',ini:'DM',name:'C. Daniel Marcelino',pos:'ZG',grupo:'Free Agent',status:'titular',isento:false,jogos:5,gols:0,rating:'C'},
-  {id:'PLR_006',ini:'FM',name:'Fábio Mafald',pos:'ZG',grupo:'EstAzul',status:'titular',isento:false,jogos:7,gols:6,rating:'B'},
-  {id:'PLR_007',ini:'HC',name:'Hudson Costa',pos:'ZG',grupo:'EstAzul',status:'titular',isento:false,jogos:6,gols:0,rating:'B'},
-  {id:'PLR_008',ini:'JR',name:'João Ricardo',pos:'ZC',grupo:'Free Agent',status:'titular',isento:false,jogos:6,gols:0,rating:'C'},
-  {id:'PLR_009',ini:'CL',name:'Cleyton',pos:'ZG',grupo:'EstAzul',status:'titular',isento:false,jogos:5,gols:0,rating:'C'},
-  {id:'PLR_010',ini:'RL',name:'Renan Lucena',pos:'GL',grupo:'Free Agent',status:'titular',isento:true,jogos:6,gols:0,rating:'B'},
-  {id:'PLR_011',ini:'RG',name:'Ricardo Guedes',pos:'GL',grupo:'Free Agent',status:'titular',isento:true,jogos:3,gols:0,rating:'A'},
-  {id:'PLR_012',ini:'DM2',name:'Daniel Mota',pos:'ZG',grupo:'Free Agent',status:'titular',isento:false,jogos:3,gols:1,rating:'C'},
-  {id:'PLR_013',ini:'YF',name:'Yan Fernandes',pos:'MC',grupo:'EstAzul',status:'titular',isento:false,jogos:5,gols:7,rating:'B'},
-  {id:'PLR_014',ini:'AP',name:'Alex Passala',pos:'MA',grupo:'Free Agent',status:'titular',isento:false,jogos:4,gols:13,rating:'A'},
-  {id:'PLR_015',ini:'JV',name:'Jadson Vidal',pos:'MC',grupo:'Free Agent',status:'titular',isento:false,jogos:3,gols:6,rating:'C'},
-  {id:'PLR_016',ini:'CR',name:'Cremoso',pos:'MC',grupo:'Free Agent',status:'titular',isento:false,jogos:4,gols:1,rating:'C'},
-  {id:'PLR_017',ini:'RA',name:'Rubens Azevedo',pos:'MC',grupo:'EstAzul',status:'fora',isento:false,jogos:4,gols:0,rating:'C'},
-  {id:'PLR_018',ini:'JB',name:'João Bastos',pos:'LD',grupo:'Free Agent',status:'titular',isento:false,jogos:3,gols:0,rating:'D'},
-  {id:'PLR_019',ini:'LU',name:'Luciano',pos:'MC',grupo:'Free Agent',status:'peneira',isento:false,jogos:1,gols:0,rating:'—'},
-  {id:'PLR_020',ini:'JZ',name:'Juárez',pos:'ZG',grupo:'Free Agent',status:'peneira',isento:false,jogos:2,gols:1,rating:'—'},
-  {id:'PLR_021',ini:'LK',name:'Lucas K.',pos:'MC',grupo:'Free Agent',status:'saiu',isento:false,jogos:5,gols:6,rating:'B'},
-  {id:'PLR_022',ini:'TN',name:'Tony',pos:'MC',grupo:'Free Agent',status:'titular',isento:false,jogos:2,gols:2,rating:'C'},
-  {id:'PLR_1038',ini:'RB',name:'Renato Barbosa',pos:'—',grupo:'Free Agent',status:'titular',isento:false,jogos:1,gols:1,rating:'—'},
-];
+// ── GAS endpoint ──────────────────────────────────────────────────────────
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxDkuy82u-P-7YLeQCE_CLMZ_J4Aj1aAkWq9hee4AyVY_auqNbWe1uwaM0bbhI8q8n3lA/exec';
+
+// ── State ─────────────────────────────────────────────────────────────────
+let JOGOS = [], ARTS = [], PLAYERS = [], CAMPOS = [];
+
+// ── Fetch helpers ─────────────────────────────────────────────────────────
+function showLoading(id){const el=document.getElementById(id);if(el)el.innerHTML='<div style="padding:32px;text-align:center;color:var(--ink4);font-family:var(--fm);font-size:11px;letter-spacing:1px;">CARREGANDO…</div>';}
+function showError(id,msg){const el=document.getElementById(id);if(el)el.innerHTML=`<div style="padding:20px;text-align:center;color:var(--red);font-size:12px;">${msg}</div>`;}
+
+async function fetchGAS(action){
+  const res = await fetch(`${GAS_URL}?action=${action}`);
+  return JSON.parse(await res.text());
+}
+
+// ── Load all data ─────────────────────────────────────────────────────────
+async function loadAll(){
+  showLoading('dash-jogos');showLoading('jogos-list');showLoading('dash-art');
+  try{
+    const data = await fetchGAS('all');
+    JOGOS    = data.jogos        || [];
+    ARTS     = data.artilheiros  || [];
+    PLAYERS  = data.jogadores    || [];
+    CAMPOS   = data.campos       || [];
+
+    // nav badges
+    const jb=document.querySelector('#nav-jogos .sb-pill');
+    const eb=document.querySelector('#nav-elenco .sb-pill');
+    if(jb)jb.textContent=JOGOS.length;
+    if(eb)eb.textContent=PLAYERS.length;
+
+    updateKPIs();
+    updateCampoChips();
+    renderJogos('dash-jogos',6);
+    renderJogos('jogos-list',999,true);
+    renderArts('dash-art');
+    renderElenco();
+    showToast('✓ Dados atualizados do banco');
+  }catch(err){
+    console.error(err);
+    showError('dash-jogos','Erro ao carregar. Verifique a conexão.');
+    showError('jogos-list','Erro ao carregar jogos.');
+    showError('dash-art','Erro ao carregar artilheiros.');
+    showToast('⚠ Erro ao conectar com o banco');
+  }
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────
+function updateKPIs(){
+  const fin=JOGOS.filter(j=>j.status==='finished');
+  const wins=fin.filter(j=>j.result==='V').length;
+  const draws=fin.filter(j=>j.result==='E').length;
+  const losses=fin.filter(j=>j.result==='D').length;
+  const total=fin.length;
+  const pct=total>0?Math.round(((wins+draws*0.5)/total)*100):0;
+  const active=PLAYERS.filter(p=>p.status==='titular').length;
+  const pen=PLAYERS.filter(p=>p.status==='peneira').length;
+  const fora=PLAYERS.filter(p=>p.status==='fora_temp').length;
+  const top=ARTS[0];
+
+  const kv=document.querySelectorAll('.kpi-val');
+  if(kv[0])kv[0].innerHTML=`${pct}<span style="font-size:18px;color:var(--ink4)">%</span>`;
+  if(kv[1])kv[1].textContent=top?top.goals:'—';
+  if(kv[2])kv[2].textContent=active;
+  // kv[3] financeiro — mantém estático por ora
+
+  const ks=document.querySelectorAll('.kpi-sub');
+  if(ks[0])ks[0].textContent=`${wins}V · ${draws}E · ${losses}D em ${total} jogos`;
+  if(ks[1])ks[1].textContent=top?top.name:'—';
+  if(ks[2])ks[2].textContent=`${pen} peneiras · ${fora} fora temp.`;
+
+  // temporada bar
+  const bv=document.querySelector('.seas-bar-v');
+  const be=document.querySelector('.seas-bar-e');
+  const bd=document.querySelector('.seas-bar-d');
+  if(bv&&total>0){bv.style.width=`${(wins/total*100).toFixed(1)}%`;be.style.width=`${(draws/total*100).toFixed(1)}%`;bd.style.width=`${(losses/total*100).toFixed(1)}%`;}
+
+  const sn=document.querySelectorAll('.seas-num');
+  if(sn[0])sn[0].textContent=wins;
+  if(sn[1])sn[1].textContent=draws;
+  if(sn[2])sn[2].textContent=losses;
+}
+
+// ── Campo chips ───────────────────────────────────────────────────────────
+function updateCampoChips(){
+  if(!CAMPOS.length)return;
+  const wrap=document.querySelector('.campo-chips');
+  if(!wrap)return;
+  wrap.innerHTML=CAMPOS.map((c,i)=>
+    `<div class="campo-chip ${i===0?'sel':''}" onclick="selCampo(this,'${c.name}')">${c.name}</div>`
+  ).join('')+'<div class="campo-chip" onclick="selCampo(this,\'outro\')">+ Outro</div>';
+  if(CAMPOS.length)cvCampo=CAMPOS[0].name;
+}
+
 
 // ── Placar ────────────────────────────────────────────────────────────────
 function placar(j){
@@ -886,6 +926,9 @@ renderJogos('dash-jogos',6);
 renderJogos('jogos-list',99,true);
 renderArts('dash-art');
 renderElenco();
+// ── Init ──────────────────────────────────────────────────────────────────
+loadAll();
+
 </script>
 </body>
 </html>
