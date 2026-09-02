@@ -352,6 +352,13 @@ html,body{min-height:100vh;background:var(--bg);font-family:var(--fu);color:var(
 .pj-av{width:26px;height:26px;border-radius:5px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);font-family:var(--fm);font-size:8px;display:flex;align-items:center;justify-content:center;}
 .pj-av.gl{background:rgba(191,54,12,.4);}
 .pj-more{font-family:var(--fm);font-size:9px;color:rgba(255,255,255,.4);padding:0 6px;display:flex;align-items:center;}
+
+/* ── Player modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(13,40,24,.55);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s var(--ease);}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-sheet{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:var(--sidebar-main,480px);margin:0 auto;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s var(--ease);}
+.modal-overlay.open .modal-sheet{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:99px;margin:10px auto 0;}
 </style>
 </head>
 <body>
@@ -696,17 +703,22 @@ html,body{min-height:100vh;background:var(--bg);font-family:var(--fu);color:var(
         <div class="card">
           <div class="card-head"><span class="card-title">Identidade do Clube</span></div>
           <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
-            <div class="form-field"><label class="form-lbl">Nome oficial</label><input class="form-inp" value="Estrela Mecânica FC"></div>
-            <div class="form-field"><label class="form-lbl">Cidade</label><input class="form-inp" value="Foz do Iguaçu, PR"></div>
-            <div class="form-field"><label class="form-lbl">Chave PIX</label><input class="form-inp" value="martin@estrela.com.br"></div>
-            <button class="btn btn-primary" style="align-self:flex-start;" onclick="showToast('Configurações salvas!')">Salvar alterações</button>
+            <div class="form-field"><label class="form-lbl">Nome oficial</label><input class="form-inp" id="cfg-club-name" placeholder="Estrela Mecânica FC"></div>
+            <div class="form-field"><label class="form-lbl">Cidade</label><input class="form-inp" id="cfg-club-city" placeholder="Foz do Iguaçu, PR"></div>
+            <div class="form-field"><label class="form-lbl">Chave PIX</label><input class="form-inp" id="cfg-pix" placeholder="email, CPF ou telefone"></div>
+            <div class="form-field"><label class="form-lbl">Valor padrão do campo (R$)</label><input class="form-inp" id="cfg-field-cost" type="number" placeholder="150"></div>
+            <button class="btn btn-primary" style="align-self:flex-start;" onclick="saveClube()">Salvar alterações</button>
           </div>
         </div>
         <div class="card">
           <div class="card-head"><span class="card-title">Regras de Pagamento</span></div>
           <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
-            <div class="form-field"><label class="form-lbl">Modo padrão</label><select class="form-inp"><option selected>Rateado</option><option>Total (capitão)</option></select></div>
-            <div class="form-field"><label class="form-lbl">Prazo</label><select class="form-inp"><option>No dia</option><option selected>48h após o jogo</option><option>7 dias</option></select></div>
+            <div class="form-field"><label class="form-lbl">Modo padrão</label>
+              <select class="form-inp" id="cfg-pay-mode"><option>Rateado</option><option>Total (capitão)</option></select>
+            </div>
+            <div class="form-field"><label class="form-lbl">Prazo de pagamento</label>
+              <select class="form-inp" id="cfg-deadline"><option>No dia</option><option>48h após o jogo</option><option>7 dias</option></select>
+            </div>
             <div style="background:var(--green-l);border-radius:7px;padding:12px;font-size:11px;color:var(--green);line-height:1.8;">
               ✓ Goleiros isentos automaticamente<br>
               ✓ Peneiras pagam cota igual<br>
@@ -721,6 +733,72 @@ html,body{min-height:100vh;background:var(--bg);font-family:var(--fu);color:var(
 </div>
 </div>
 
+<!-- Player edit modal -->
+<div class="modal-overlay" id="player-modal" onclick="if(event.target===this)closePlayerModal()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;">
+      <div id="pm-av" style="width:44px;height:44px;border-radius:9px;background:var(--field);color:#fff;font-family:var(--fm);font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div id="pm-name" style="font-family:var(--fd);font-size:18px;font-weight:700;color:var(--ink);font-style:italic;"></div>
+        <div id="pm-id" style="font-family:var(--fm);font-size:9px;color:var(--ink4);margin-top:2px;"></div>
+      </div>
+      <button onclick="closePlayerModal()" style="background:var(--bg2);border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:14px;color:var(--ink3);">✕</button>
+    </div>
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="form-field">
+          <label class="form-lbl">Rating</label>
+          <select class="form-inp" id="pm-rating">
+            <option value="S">S — Estrela</option>
+            <option value="A">A — Ótimo</option>
+            <option value="B">B — Bom</option>
+            <option value="C">C — Regular</option>
+            <option value="D">D — Em desenvolvimento</option>
+            <option value="—">— Sem rating</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-lbl">Camisa nº</label>
+          <input class="form-inp" id="pm-jersey" type="number" placeholder="10">
+        </div>
+        <div class="form-field">
+          <label class="form-lbl">Pé</label>
+          <select class="form-inp" id="pm-foot">
+            <option>Destro</option><option>Canhoto</option><option>Ambidestro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="form-lbl">Telefone / WhatsApp</label>
+        <input class="form-inp" id="pm-phone" type="tel" placeholder="+55 45 9...">
+      </div>
+      <div class="form-field">
+        <label class="form-lbl">Data de nascimento</label>
+        <input class="form-inp" id="pm-birth" type="date">
+      </div>
+      <div class="form-field">
+        <label class="form-lbl">Observações</label>
+        <input class="form-inp" id="pm-notes" placeholder="Notas sobre o jogador…">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
+        <div style="background:var(--bg2);border-radius:7px;padding:10px;text-align:center;">
+          <div id="pm-jogos" style="font-family:var(--fd);font-size:24px;font-weight:700;color:var(--ink);">—</div>
+          <div style="font-family:var(--fm);font-size:8px;color:var(--ink4);letter-spacing:1px;">JOGOS</div>
+        </div>
+        <div style="background:var(--bg2);border-radius:7px;padding:10px;text-align:center;">
+          <div id="pm-gols" style="font-family:var(--fd);font-size:24px;font-weight:700;color:var(--or);">—</div>
+          <div style="font-family:var(--fm);font-size:8px;color:var(--ink4);letter-spacing:1px;">GOLS</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 20px 20px;display:flex;gap:8px;">
+      <button class="cbtn cbtn-g" style="flex:1;" onclick="closePlayerModal()">Cancelar</button>
+      <button class="cbtn cbtn-p" style="flex:2;" id="pm-save-btn" onclick="savePlayerModal()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
@@ -728,7 +806,7 @@ html,body{min-height:100vh;background:var(--bg);font-family:var(--fu);color:var(
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxDkuy82u-P-7YLeQCE_CLMZ_J4Aj1aAkWq9hee4AyVY_auqNbWe1uwaM0bbhI8q8n3lA/exec';
 
 // ── State ─────────────────────────────────────────────────────────────────
-let JOGOS = [], ARTS = [], PLAYERS = [], CAMPOS = [];
+let JOGOS = [], ARTS = [], PLAYERS = [], CAMPOS = [], CLUBE = {};
 
 // ── Fetch helpers ─────────────────────────────────────────────────────────
 function showLoading(id){const el=document.getElementById(id);if(el)el.innerHTML='<div style="padding:32px;text-align:center;color:var(--ink4);font-family:var(--fm);font-size:11px;letter-spacing:1px;">CARREGANDO…</div>';}
@@ -736,6 +814,14 @@ function showError(id,msg){const el=document.getElementById(id);if(el)el.innerHT
 
 async function fetchGAS(action){
   const res = await fetch(`${GAS_URL}?action=${action}`);
+  return JSON.parse(await res.text());
+}
+async function postGAS(body){
+  const res = await fetch(GAS_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify(body)
+  });
   return JSON.parse(await res.text());
 }
 
@@ -748,6 +834,8 @@ async function loadAll(){
     ARTS     = data.artilheiros  || [];
     PLAYERS  = data.jogadores    || [];
     CAMPOS   = data.campos       || [];
+    CLUBE    = data.clube        || {};
+    applyClube();
 
     // nav badges
     const jb=document.querySelector('#nav-jogos .sb-pill');
@@ -817,6 +905,34 @@ function updateCampoChips(){
   ).join('')+'<div class="campo-chip" onclick="selCampo(this,\'outro\')">+ Outro</div>';
   if(CAMPOS.length)cvCampo=CAMPOS[0].name;
 }
+
+// ── Apply clube config to UI ─────────────────────────────────────────────
+function applyClube(){
+  if(!CLUBE||!CLUBE.club_name)return;
+  const nm=document.getElementById('cfg-club-name');  if(nm)nm.value=CLUBE.club_name||'';
+  const ct=document.getElementById('cfg-club-city');  if(ct)ct.value=CLUBE.club_city||'';
+  const px=document.getElementById('cfg-pix');        if(px)px.value=CLUBE.club_pix_key||'';
+  const dl=document.getElementById('cfg-deadline');   if(dl)dl.value=CLUBE.club_payment_deadline||'';
+  const fc=document.getElementById('cfg-field-cost'); if(fc)fc.value=CLUBE.club_default_field_cost||'';
+  const pm=document.getElementById('cfg-pay-mode');   if(pm)pm.value=CLUBE.club_payment_mode||'Rateado';
+  const sn=document.querySelector('.sb-club-name');   if(sn&&CLUBE.club_name)sn.textContent=CLUBE.club_name;
+}
+async function saveClube(){
+  const fields={
+    club_name:               document.getElementById('cfg-club-name')?.value||'',
+    club_city:               document.getElementById('cfg-club-city')?.value||'',
+    club_pix_key:            document.getElementById('cfg-pix')?.value||'',
+    club_payment_deadline:   document.getElementById('cfg-deadline')?.value||'',
+    club_default_field_cost: document.getElementById('cfg-field-cost')?.value||'',
+    club_payment_mode:       document.getElementById('cfg-pay-mode')?.value||'',
+  };
+  try{
+    const r=await postGAS({action:'save_clube',fields});
+    if(r.ok){Object.assign(CLUBE,fields);showToast('✓ Configurações salvas');}
+    else showToast('⚠ Erro: '+r.error);
+  }catch(e){showToast('⚠ Erro ao salvar');}
+}
+
 
 
 // ── Placar ────────────────────────────────────────────────────────────────
@@ -944,15 +1060,15 @@ function renderElenco(){
   const sd={titular:'sd-t',peneira:'sd-p',fora:'sd-f',saiu:'sd-s'};
   const rb={'S':'rt-s','A':'rt-a','B':'rt-b','C':'rt-c','D':'rt-c','—':'rt-c'};
   document.getElementById('el-tbody').innerHTML=f.map(p=>
-    `<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="pl-av">${p.ini}</div><div>`+
+    `<tr style="cursor:pointer;" onclick="openPlayerModal('${p.id}')"><td><div style="display:flex;align-items:center;gap:8px;"><div class="pl-av">${p.ini}</div><div>`+
     `<div style="font-weight:600;font-size:12px;">${p.name}</div>`+
     `<div style="font-family:var(--fm);font-size:9px;color:var(--ink4);">${p.grupo}</div></div></div></td>`+
     `<td><span class="pos-tag ${posC(p.pos)}">${p.pos}</span></td>`+
     `<td style="font-size:11px;color:var(--ink3);">${p.grupo}</td>`+
     `<td><span class="sdot ${sd[p.status]||'sd-t'}"></span><span style="font-size:11px;">${p.status}</span></td>`+
-    `<td style="font-family:var(--fm);font-size:11px;">${p.jogos}</td>`+
-    `<td style="font-family:var(--fd);font-size:16px;font-weight:700;">${p.gols}</td>`+
-    `<td><span class="rtag ${rb[p.rating]||'rt-c'}">${p.rating}</span></td>`+
+    `<td style="font-family:var(--fm);font-size:11px;">${p.total_jogos||p.jogos||0}</td>`+
+    `<td style="font-family:var(--fd);font-size:16px;font-weight:700;">${p.total_gols||p.gols||0}</td>`+
+    `<td><span class="rtag ${rb[p.rating]||'rt-c'}" onclick="openPlayerModal('${p.id}')" style="cursor:pointer;" title="Clique para editar">${p.rating||'—'}</span></td>`+
     `<td>${p.isento?'<span style="font-family:var(--fm);font-size:9px;font-weight:600;color:var(--amber);letter-spacing:.5px;">ISENTO</span>':'—'}</td></tr>`
   ).join('');
 }
@@ -1119,6 +1235,58 @@ renderJogos('dash-jogos',6);
 renderJogos('jogos-list',99,true);
 renderArts('dash-art');
 renderElenco();
+// ── Player modal ─────────────────────────────────────────────────────────
+let _editingPlayer = null;
+
+function openPlayerModal(playerId){
+  const p = PLAYERS.find(x=>x.id===playerId) || FALLBACK_PLAYERS.find(x=>x.id===playerId);
+  if(!p)return;
+  _editingPlayer = p;
+  document.getElementById('pm-av').textContent    = p.ini;
+  document.getElementById('pm-name').textContent  = p.name;
+  document.getElementById('pm-id').textContent    = p.id + ' · ' + p.pos;
+  document.getElementById('pm-rating').value      = p.rating || '—';
+  document.getElementById('pm-jersey').value      = p.jersey_num || '';
+  document.getElementById('pm-foot').value        = p.foot || 'Destro';
+  document.getElementById('pm-phone').value       = p.phone || '';
+  document.getElementById('pm-birth').value       = p.birth_date || '';
+  document.getElementById('pm-notes').value       = p.notes || '';
+  document.getElementById('pm-jogos').textContent = p.total_jogos || 0;
+  document.getElementById('pm-gols').textContent  = p.total_gols || 0;
+  document.getElementById('player-modal').classList.add('open');
+}
+
+function closePlayerModal(){
+  document.getElementById('player-modal').classList.remove('open');
+  _editingPlayer = null;
+}
+
+async function savePlayerModal(){
+  if(!_editingPlayer)return;
+  const btn = document.getElementById('pm-save-btn');
+  btn.textContent = 'Salvando…'; btn.disabled = true;
+  const fields = {
+    rating:        document.getElementById('pm-rating').value,
+    jersey_number: document.getElementById('pm-jersey').value,
+    phone:         document.getElementById('pm-phone').value,
+    birth_date:    document.getElementById('pm-birth').value,
+    notes:         document.getElementById('pm-notes').value,
+  };
+  try{
+    const r = await postGAS({action:'update_player', player_id: _editingPlayer.id, fields});
+    if(r.ok){
+      // Update local state
+      const p = PLAYERS.find(x=>x.id===_editingPlayer.id);
+      if(p){ p.rating=fields.rating; p.phone=fields.phone; p.jersey_num=fields.jersey_number; p.birth_date=fields.birth_date; p.notes=fields.notes; }
+      showToast('✓ Jogador atualizado');
+      closePlayerModal();
+      renderElenco();
+    } else { showToast('⚠ Erro: '+(r.error||'desconhecido')); }
+  }catch(e){ showToast('⚠ Erro ao salvar'); }
+  btn.textContent = 'Salvar alterações'; btn.disabled = false;
+}
+
+// ── Fallback players
 // ── Fallback players (used before GAS loads) ─────────────────────────────
 const FALLBACK_PLAYERS=[
   {id:'PLR_001',ini:'AF',name:'Anderson Felipe',pos:'AT',status:'titular',isento:false},
