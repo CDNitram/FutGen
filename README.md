@@ -1,97 +1,188 @@
-⚽ FutGen
+# FutGen · Manager
 
-Plataforma de gestão de futebol amador — Estrela Mecânica FC · Foz do Iguaçu, PR
-Desenvolvido por TechNigma AI Lab
+> **Sistema de gestão para futebol amador** — Estrela Mecânica FC  
+> Stack: HTML/CSS/JS (single file) · Google Apps Script · Google Sheets
 
-O que é
+---
 
-FutGen é uma plataforma web para gestão de times de futebol amador, com foco em:
+## 🚀 Demo
 
-📋 Gestão de elenco — cadastro de jogadores, posições, grupos e status
-📅 Histórico de jogos — partidas, placares, gols e artilheiros
-⚽ Artilharia — ranking de gols por temporada
-🧤 Árbitros & Goleiros — marketplace de agenciamento (em desenvolvimento)
-💰 Financeiro — controle de pagamento por partida (em desenvolvimento)
-Estrutura do projeto
+**GitHub Pages →** [https://cdnitram.github.io/FutGen/](https://cdnitram.github.io/FutGen/)
+
+---
+
+## 📁 Estrutura do Repositório
+
+```
 FutGen/
-│
-├── apps/
-│   ├── futgen_player_app_v1.html     # App do jogador (leitura) — público
-│   └── futgen_admin_v3.html          # App do organizador (gestão)
-│
-├── database/
-│   ├── futgen_database_v2.xlsx       # Schema + seed data local
-│   └── futgen_database_schema_v2.xlsx# Documentação do schema
-│
-├── pitch/
-│   └── futgen_arbitros_pitch.pptx    # Pitch deck — módulo árbitros & goleiros
-│
+├── App/
+│   └── FutGen_Manager_V4.html   ← Frontend principal (versão atual)
+├── GAS/
+│   └── FutGen_GAS_v3.js         ← Google Apps Script (backend)
 └── README.md
-Stack
-Camada	Tecnologia
-Frontend	HTML · CSS · JavaScript (vanilla)
-Backend (Fase 1)	Google Apps Script (GAS)
-Banco de dados (Fase 1)	Google Sheets
-Hospedagem	GitHub Pages
-Backend (Fase 2)	Supabase + PostgreSQL
-IA	Claude API (TechNigma AI Lab)
-Apps ao vivo
-App	Descrição	Status
-Player App V1	Tela pública do jogador — artilheiros, jogos, elenco	🟢 Live
-Admin App V3	Gestão do clube — convocações, financeiro, relatórios	🟡 Beta
-Árbitros & Goleiros	Marketplace de agenciamento	🔵 Em desenvolvimento
-Banco de dados
+```
 
-O banco de dados opera em Google Sheets na Fase 1, com migração planejada para Supabase + PostgreSQL.
+---
 
-Sheet ID (produção): 1tQqzhs0PhI4aPgPfX2bmbTcd4-1eoxjHQRj3c9zPVes
+## 🏗️ Arquitetura
 
-Tabelas
-Aba	Conteúdo
-jogadores	Elenco completo (23 atletas)
-jogos	Histórico de partidas (J1–J18)
-placares_gols	Eventos de gol por partida
-artilheiros	Ranking de gols da temporada
-campos	Campos e quadras cadastrados
-convocacoes	Presença confirmada por jogo
-pagamentos	Controle financeiro por partida
-log_futgen	Auditoria de ações do sistema
-Piloto
+```
+Browser (GitHub Pages)
+    │
+    │  fetch() — JSONP via GAS Web App URL
+    ▼
+Google Apps Script (GAS)
+    │
+    │  SpreadsheetApp
+    ▼
+Google Sheets — futgen_database_v3
+    (jogadores · jogos · artilheiros · times · juizes · clube · logs)
+```
 
-Clube: Estrela Mecânica FC
-Cidade: Foz do Iguaçu, PR
-Temporada: 2025–2026
-Jogos registrados: 18 (J1–J18)
-Atletas: 23
-Artilheiro: Anderson Felipe — 30 gols
+> **Próximo passo (roadmap):** migrar banco para Supabase + PostgreSQL com RLS.
 
-Roadmap
-Fase 1 — MVP Foz (agora)
- App do jogador (leitura) — elenco, jogos, artilheiros
- App do organizador — convocação, financeiro, relatórios
- Banco de dados Google Sheets
- GAS endpoint (GET/POST)
- Deploy GitHub Pages
- Módulo árbitros & goleiros
-Fase 2 — Expansão (3–6 meses)
- Auth de jogadores
- Votação pós-jogo (MVP, Raça, Garra)
- Rating por IA (FutGen Score via Claude API)
- PIX integrado
- Expansão Cascavel e Toledo
-Fase 3 — Plataforma (6–12 meses)
- Migração Supabase + PostgreSQL
- WebSocket ao vivo
- SaaS para times
- Multi-cidade
-Convenções de código
-IDs de jogadores: PLR_001, PLR_002 … PLR_1038
-IDs de partidas: MTH_001 → serial J1, J2 …
-IDs de eventos: EVT_001, EVT_002 …
-Idioma: labels em Português (BR) · código em inglês
-Versionamento de arquivos: nome_vN_YYYY-MM-DD.html
-Sobre
+---
 
-Desenvolvido por Martin Cordoba — fundador da TechNigma AI Lab
+## ✨ Funcionalidades — V4
 
-FutGen · TechNigma AI Lab · 2026# FutGen
+| Módulo | Status |
+|---|---|
+| Dashboard — KPIs ao vivo (aproveitamento, artilheiros, elenco, gols) | ✅ |
+| Temporada — W/D/L dinâmico via GAS | ✅ |
+| Convocação — wizard 3 passos (conv → preview → confirmação) | ✅ |
+| Registro de jogo — POST via GAS (`insert_jogo`) | ✅ |
+| Pagamentos — salvo junto ao jogo (`save_pagamentos`) | ✅ |
+| Elenco — listagem ao vivo (`jogadores`) | ✅ |
+| Artilheiros — ranking ao vivo (`artilheiros`) | ✅ |
+| Times adversários — CRUD via GAS (`times` / `insert_time`) | ✅ |
+| Árbitros — CRUD via GAS (`juizes` / `insert_referee`) | ✅ |
+| Configurações do clube — carregado do GAS, sem dados hardcoded | ✅ |
+| Modo offline — graceful fallback (sem dados mock sensíveis) | ✅ |
+| Loading spinner com progress bar durante init | ✅ |
+
+---
+
+## 🔒 Segurança
+
+Todo dado sensível (PIX, telefones, datas de nascimento, documentos) vive **exclusivamente no Google Sheets** e trafega via GAS em runtime.  
+O HTML público (GitHub Pages) **não contém** nenhum dado pessoal ou credencial hardcoded.
+
+- ✅ Nenhuma chave PIX no código-fonte
+- ✅ Nenhum dado de jogador (nome real, telefone, doc) no HTML
+- ✅ Fallback offline retorna array vazio — sem dados mock
+- ✅ GAS_URL é pública por design (GAS Web Apps são stateless e controlados por permissão no Google)
+
+---
+
+## ⚙️ Setup
+
+### 1. Google Sheets
+
+Base de dados: **futgen_database_v3**  
+`Spreadsheet ID: 1JqWOJUAlOhMQWXSj1ngqU0Wn9eBoXCN9kjY85V0bonM`
+
+Abas:
+| Aba | Layout | Descrição |
+|---|---|---|
+| `jogadores` | row 0 = título, row 1 = headers, row 2+ = dados | Elenco |
+| `jogos` | row 0 = título, row 1 = headers, row 2+ = dados | Partidas |
+| `artilheiros` | row 0 = título, row 1 = headers, row 2+ = dados | Ranking de gols |
+| `times` | row 0 = título, row 1 = headers, row 2+ = dados | Times adversários |
+| `juizes` | row 0 = título, row 1 = headers, row 2+ = dados | Árbitros |
+| `clube` | row 0 = headers, row 1 = valores | Config do clube (horizontal) |
+| `logs` | — | Auditoria de ações |
+
+### 2. Google Apps Script
+
+1. Abra o Google Sheets → **Extensões → Apps Script**
+2. Cole o conteúdo de `GAS/FutGen_GAS_v3.js`
+3. Salve e **Implantar → Nova implantação → Web App**
+   - Executar como: **Eu**
+   - Acesso: **Qualquer pessoa**
+4. Copie a URL gerada
+
+### 3. Frontend
+
+Abra `App/FutGen_Manager_V4.html` e confirme a variável no topo do `<script>`:
+
+```js
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbx.../exec';
+```
+
+Substitua pela URL da sua implantação se necessário.
+
+### 4. Deploy
+
+Faça push para a branch `main` — o GitHub Pages serve automaticamente.  
+URL pública: `https://cdnitram.github.io/FutGen/App/FutGen_Manager_V4.html`
+
+---
+
+## 🔌 API GAS — Referência
+
+### GET Actions
+
+| `?action=` | Retorno |
+|---|---|
+| `all` | `{ jogadores, jogos, artilheiros, clube }` |
+| `times` | Lista de times adversários |
+| `juizes` | Lista de árbitros |
+| `logs` | Log de ações recentes |
+
+### POST Actions
+
+Envio: `JSON.stringify({ action, ...payload })`
+
+| `action` | Payload obrigatório | Retorno |
+|---|---|---|
+| `insert_jogo` | campos da aba `jogos` | `{ ok, match_id }` |
+| `save_convocacao` | `{ match_id, jogadores[] }` | `{ ok }` |
+| `save_pagamentos` | `{ match_id, pagamentos[] }` | `{ ok }` |
+| `insert_time` | campos da aba `times` | `{ ok, team_id }` |
+| `insert_referee` | campos da aba `juizes` | `{ ok, referee_id }` |
+
+---
+
+## 🎨 Design System — Premium Pitch
+
+| Token | Valor |
+|---|---|
+| `--field` | `#0D2818` (verde campo) |
+| `--gold` | `#C9933A` (ouro) |
+| `--or` | `#E8621A` (laranja) |
+| `--bg` | `#FAFAF7` (off-white) |
+
+Fontes: **Playfair Display** (headings/italic) · **Inter** (UI) · **JetBrains Mono** (dados)
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Migração do banco para **Supabase + PostgreSQL** com RLS
+- [ ] Auth de usuário (admin × jogador)
+- [ ] Módulo financeiro completo (receitas / despesas / saldo)
+- [ ] Notificações de convocação via WhatsApp API
+- [ ] Hosting: **Vercel** com domínio customizado
+- [ ] PWA (service worker + manifest)
+
+---
+
+## 📋 Versões
+
+| Versão | Descrição |
+|---|---|
+| V4 (atual) | GAS completo — dados reais, todos POSTs funcionando, sem mocks sensíveis |
+| V3 | Integração parcial GAS + mocks locais |
+| V2 | MVP frontend estático |
+| V1 | Protótipo inicial |
+
+---
+
+## 👤 Autor
+
+**Martin Cordoba** · [@CDNitram](https://github.com/CDNitram)  
+Presidente — Estrela Mecânica FC · Foz do Iguaçu, PR
+
+---
+
+*FutGen · Manager V4 · Premium Pitch Design System*
