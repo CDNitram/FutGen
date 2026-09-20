@@ -78,8 +78,7 @@ O HTML público (GitHub Pages) **não contém** nenhum dado pessoal ou credencia
 
 ### 1. Google Sheets
 
-Base de dados: **futgen_database_v3**  
-`Spreadsheet ID: 1JqWOJUAlOhMQWXSj1ngqU0Wn9eBoXCN9kjY85V0bonM`
+Base de dados: **futgen_database_v3** (acesso restrito — Drive privado)
 
 Abas:
 | Aba | Layout | Descrição |
